@@ -7,6 +7,7 @@ private struct PrepublishingOption {
 }
 
 private enum PrepublishingIdentifier {
+    case schedule
     case visibility
     case tags
 }
@@ -17,6 +18,7 @@ class PrepublishingViewController: UITableViewController {
     private let completion: (AbstractPost) -> ()
 
     private let options: [PrepublishingOption] = [
+        PrepublishingOption(id: .schedule, title: NSLocalizedString("Publish", comment: "Label for Publish")),
         PrepublishingOption(id: .visibility, title: NSLocalizedString("Visibility", comment: "Label for Visibility")),
         PrepublishingOption(id: .tags, title: NSLocalizedString("Tags", comment: "Label for Tags"))
     ]
@@ -75,16 +77,21 @@ class PrepublishingViewController: UITableViewController {
             configureTagCell(cell)
         case .visibility:
             configureVisibilityCell(cell)
+        case .schedule:
+            configureScheduleCell(cell)
         }
 
         return cell
     }
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if indexPath.row == 0 {
-            didTapVisibilityCell()
-        } else {
+        switch options[indexPath.row].id {
+        case .tags:
             didTapTagCell()
+        case .visibility:
+            didTapVisibilityCell()
+        case .schedule:
+            didTapSchedule()
         }
     }
 
@@ -130,6 +137,48 @@ class PrepublishingViewController: UITableViewController {
         }
 
         navigationController?.pushViewController(visbilitySelectorViewController, animated: true)
+    }
+
+    // MARK: - Schedule
+
+    var scheduleLabel: String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = .long
+        dateFormatter.timeStyle = .short
+        dateFormatter.timeZone = post.blog.timeZone as TimeZone
+
+        if let dateCreated = post.dateCreated, !post.shouldPublishImmediately() {
+            return dateFormatter.string(from: dateCreated)
+        } else {
+            return NSLocalizedString("Immediately", comment: "Label that indicates that the post will be immediately published");
+        }
+    }
+
+    func configureScheduleCell(_ cell: WPTableViewCell) {
+        cell.detailTextLabel?.text = scheduleLabel
+    }
+
+    func didTapSchedule() {
+        let model = PublishSettingsViewModel(post: post)
+
+        (navigationController as? PrepublishingNavigationController)?.presentedVC?.transition(to: .hidden)
+
+        let schedulingCalendarViewController = SchedulingCalendarViewController()
+        let vc = LightNavigationController(rootViewController: schedulingCalendarViewController)
+        schedulingCalendarViewController.coordinator = DateCoordinator(date: model.date, timeZone: model.timeZone, dateFormatter: model.dateFormatter, dateTimeFormatter: model.dateTimeFormatter) { [weak self] date in
+
+            (self?.navigationController as? PrepublishingNavigationController)?.presentedVC?.transition(to: .collapsed)
+
+            self?.tableView.reloadData()
+            if let a  = self?.tableView.indexPathForSelectedRow {
+                self?.tableView.deselectRow(at: a, animated: true)
+            }
+        }
+
+        vc.modalPresentationStyle = .custom
+        vc.transitioningDelegate = self
+
+        present(vc, animated: true)
     }
 
     // MARK: - Publish Button
@@ -178,5 +227,42 @@ class PrepublishingViewController: UITableViewController {
         static let nuxButtonInsets = UIEdgeInsets(top: 0, left: 15, bottom: 0, right: 15)
         static let footerFrame = CGRect(x: 0, y: 0, width: 100, height: 40)
         static let title = NSLocalizedString("Publishing To", comment: "Label that describes in which blog the user is publishing to")
+    }
+}
+
+extension Blog {
+    @objc var timeZone: NSTimeZone {
+        let timeZoneName: String? = getOption(name: "timezone")
+        let gmtOffSet: NSNumber? = getOption(name: "gmt_offset")
+        let optionValue: NSString? = getOption(name: "time_zone")
+
+        var timeZone: NSTimeZone!
+
+        if let timeZoneName = timeZoneName, !timeZoneName.isEmpty {
+            timeZone = NSTimeZone(name: timeZoneName)
+        } else if let gmtOffSet = gmtOffSet?.floatValue {
+            timeZone = NSTimeZone.init(forSecondsFromGMT: Int(gmtOffSet * 60 * 60))
+        } else if let optionValue = optionValue {
+            let timeZoneOffsetSeconds = Int(optionValue.floatValue * 60 * 60)
+            timeZone = NSTimeZone.init(forSecondsFromGMT: timeZoneOffsetSeconds)
+        }
+
+        if timeZone == nil {
+            timeZone = NSTimeZone(forSecondsFromGMT: 0)
+        }
+
+        return timeZone
+    }
+}
+
+extension PrepublishingViewController: UIViewControllerTransitioningDelegate, UIAdaptivePresentationControllerDelegate {
+    func presentationController(forPresented presented: UIViewController, presenting: UIViewController?, source: UIViewController) -> UIPresentationController? {
+        let presentationController = HalfScreenPresentationController(presentedViewController: presented, presenting: presenting)
+        presentationController.delegate = self
+        return presentationController
+    }
+
+    func adaptivePresentationStyle(for: UIPresentationController, traitCollection: UITraitCollection) -> UIModalPresentationStyle {
+        return traitCollection.verticalSizeClass == .compact ? .overFullScreen : .none
     }
 }
