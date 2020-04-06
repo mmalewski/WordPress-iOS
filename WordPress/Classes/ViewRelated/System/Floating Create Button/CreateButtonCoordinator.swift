@@ -62,12 +62,16 @@ import Gridicons
     @objc private func showCreateSheet() {
         guard let viewController = viewController else { return }
         let actionSheetVC = actionSheetController(for: viewController.traitCollection)
-        viewController.present(actionSheetVC, animated: true, completion: {
-            WPAnalytics.track(.createSheetShown)
-        })
+
+        let bottomSheet = BottomSheetViewController(childViewController: actionSheetVC)
+        bottomSheet.show(from: viewController, sourceView: self.button)
+
+//        viewController.present(actionSheetVC, animated: true, completion: {
+//            WPAnalytics.track(.createSheetShown)
+//        })
     }
 
-    private func actionSheetController(for traitCollection: UITraitCollection) -> UIViewController {
+    private func actionSheetController(for traitCollection: UITraitCollection) -> ActionSheetViewController {
         let postsButton = ActionSheetButton(title: NSLocalizedString("Blog post", comment: "Create new Blog Post button title"),
                                             image: .gridicon(.posts),
                                             identifier: "blogPostButton",
@@ -95,7 +99,7 @@ import Gridicons
 
         viewController.popoverPresentationController?.sourceView = self.button
         viewController.popoverPresentationController?.sourceRect = self.button.bounds.offsetBy(dx: 0, dy: Constants.popoverOffset)
-        viewController.transitioningDelegate = self
+//        viewController.transitioningDelegate = self
     }
 
     @objc func hideCreateButton() {
@@ -125,21 +129,21 @@ import Gridicons
 
 // MARK: Tranisitioning Delegate
 
-extension CreateButtonCoordinator: UIViewControllerTransitioningDelegate {
-    public func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-        return BottomSheetAnimationController(transitionType: .presenting)
-    }
-
-    public func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-        return BottomSheetAnimationController(transitionType: .dismissing)
-    }
-
-    public func presentationController(forPresented presented: UIViewController, presenting: UIViewController?, source: UIViewController) -> UIPresentationController? {
-        let presentationController = BottomSheetPresentationController(presentedViewController: presented, presenting: presenting)
-        return presentationController
-    }
-
-    public func interactionControllerForDismissal(using animator: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {
-        return (viewController?.presentedViewController?.presentationController as? BottomSheetPresentationController)?.interactionController
-    }
-}
+//extension CreateButtonCoordinator: UIViewControllerTransitioningDelegate {
+//    public func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+//        return BottomSheetAnimationController(transitionType: .presenting)
+//    }
+//
+//    public func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+//        return BottomSheetAnimationController(transitionType: .dismissing)
+//    }
+//
+//    public func presentationController(forPresented presented: UIViewController, presenting: UIViewController?, source: UIViewController) -> UIPresentationController? {
+//        let presentationController = BottomSheetPresentationController(presentedViewController: presented, presenting: presenting)
+//        return presentationController
+//    }
+//
+//    public func interactionControllerForDismissal(using animator: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {
+//        return (viewController?.presentedViewController?.presentationController as? BottomSheetPresentationController)?.interactionController
+//    }
+//}

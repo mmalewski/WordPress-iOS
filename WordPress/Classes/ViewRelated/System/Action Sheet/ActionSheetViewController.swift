@@ -9,8 +9,6 @@ struct ActionSheetButton {
 class ActionSheetViewController: UIViewController {
 
     enum Constants {
-        static let gripHeight: CGFloat = 5
-        static let cornerRadius: CGFloat = 8
         static let buttonSpacing: CGFloat = 8
         static let additionalSafeAreaInsetsRegular: UIEdgeInsets = UIEdgeInsets(top: 20, left: 0, bottom: 20, right: 0)
         static let minimumWidth: CGFloat = 300
@@ -47,13 +45,6 @@ class ActionSheetViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
 
-    private var gripButton: UIButton = {
-        let button = GripButton()
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.addTarget(self, action: #selector(buttonPressed), for: .touchUpInside)
-        return button
-    }()
-
     @objc func buttonPressed() {
         dismiss(animated: true, completion: nil)
     }
@@ -61,9 +52,6 @@ class ActionSheetViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        view.clipsToBounds = true
-        view.layer.cornerRadius = Constants.cornerRadius
-        view.layer.maskedCorners = [.layerMaxXMinYCorner, .layerMinXMinYCorner]
         view.backgroundColor = .basicBackground
 
         let headerLabelView = UIView()
@@ -79,22 +67,18 @@ class ActionSheetViewController: UIViewController {
             return button(buttonInfo)
         })
 
-        NSLayoutConstraint.activate([
-            gripButton.heightAnchor.constraint(equalToConstant: Constants.gripHeight)
-        ])
-
         let buttonConstraints = buttonViews.map { button in
             return button.heightAnchor.constraint(equalToConstant: Constants.Button.height)
         }
 
-        NSLayoutConstraint.activate(buttonConstraints)
+        NSLayoutConstraint.activate(buttonConstraints + [
+            headerLabelView.heightAnchor.constraint(equalToConstant: Constants.Button.height)
+        ])
 
         let stackView = UIStackView(arrangedSubviews: [
-            gripButton,
             headerLabelView
         ] + buttonViews)
 
-        stackView.setCustomSpacing(Constants.Header.spacing, after: gripButton)
         stackView.setCustomSpacing(Constants.Header.spacing, after: headerLabelView)
 
         buttonViews.forEach { button in
@@ -104,8 +88,6 @@ class ActionSheetViewController: UIViewController {
         stackView.translatesAutoresizingMaskIntoConstraints = false
         stackView.axis = .vertical
 
-        refreshForTraits()
-
         view.addSubview(stackView)
         let stackViewConstraints = [
             view.safeAreaLayoutGuide.leadingAnchor.constraint(equalTo: stackView.leadingAnchor, constant: -Constants.Stack.insets.left),
@@ -113,10 +95,10 @@ class ActionSheetViewController: UIViewController {
             view.safeAreaLayoutGuide.topAnchor.constraint(equalTo: stackView.topAnchor, constant: -Constants.Stack.insets.top),
         ]
 
-        let bottomAnchor = view.safeAreaLayoutGuide.bottomAnchor.constraint(equalTo: stackView.bottomAnchor, constant: Constants.Stack.insets.bottom)
-        bottomAnchor.priority = .defaultHigh
+//        let bottomAnchor = view.safeAreaLayoutGuide.bottomAnchor.constraint(equalTo: stackView.bottomAnchor, constant: Constants.Stack.insets.bottom)
+//        bottomAnchor.priority = .defaultHigh
 
-        NSLayoutConstraint.activate(stackViewConstraints + [bottomAnchor])
+        NSLayoutConstraint.activate(stackViewConstraints) //+ [bottomAnchor])
     }
 
     func button(_ info: ActionSheetButton) -> UIButton {
@@ -137,23 +119,29 @@ class ActionSheetViewController: UIViewController {
         return button
     }
 
-    open override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        refreshForTraits()
-    }
-
-    private func refreshForTraits() {
-        if presentingViewController?.traitCollection.horizontalSizeClass == .regular && presentingViewController?.traitCollection.verticalSizeClass != .compact {
-            gripButton.isHidden = true
-            additionalSafeAreaInsets = Constants.additionalSafeAreaInsetsRegular
-        } else {
-            gripButton.isHidden = false
-            additionalSafeAreaInsets = .zero
-        }
-    }
-
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        return preferredContentSize = CGSize(width: Constants.minimumWidth, height: view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height)
+//        preferredContentSize = CGSize(width: Constants.minimumWidth, height: view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height)
+    }
+}
+
+// MARK: - DrawerPresentable
+
+extension ActionSheetViewController: DrawerPresentable {
+    var expandedHeight: DrawerHeight {
+        return collapsedHeight
+    }
+
+    var collapsedHeight: DrawerHeight {
+        let height = view.subviews.first!.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height + view.safeAreaInsets.bottom
+        return .contentHeight(height)
+    }
+
+    var allowsUserTransition: Bool {
+        return false
+    }
+
+    var scrollableView: UIScrollView? {
+        return nil
     }
 }
