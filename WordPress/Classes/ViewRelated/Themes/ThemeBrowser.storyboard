@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14865.1" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="CnL-S6-q9U">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16096" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="CnL-S6-q9U">
     <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14819.2"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -11,10 +12,6 @@
         <scene sceneID="0il-C4-oEu">
             <objects>
                 <viewController extendedLayoutIncludesOpaqueBars="YES" id="CnL-S6-q9U" customClass="ThemeBrowserViewController" customModule="WordPress" customModuleProvider="target" sceneMemberID="viewController">
-                    <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="d2o-HG-7t6"/>
-                        <viewControllerLayoutGuide type="bottom" id="vre-ly-ogW"/>
-                    </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="DIk-76-9Vi">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -367,10 +364,11 @@
                         <constraints>
                             <constraint firstAttribute="topMargin" secondItem="IO9-Kh-IaO" secondAttribute="top" id="AJo-qK-VtE"/>
                             <constraint firstAttribute="bottomMargin" secondItem="IO9-Kh-IaO" secondAttribute="bottom" id="ceP-yZ-gUs"/>
-                            <constraint firstItem="IO9-Kh-IaO" firstAttribute="leading" secondItem="DIk-76-9Vi" secondAttribute="leading" id="fZJ-gM-mi4"/>
-                            <constraint firstItem="vre-ly-ogW" firstAttribute="top" secondItem="IO9-Kh-IaO" secondAttribute="bottom" id="zqA-Vo-evh"/>
-                            <constraint firstAttribute="trailing" secondItem="IO9-Kh-IaO" secondAttribute="trailing" id="zxY-iH-zwf"/>
+                            <constraint firstItem="IO9-Kh-IaO" firstAttribute="leading" secondItem="jpR-Pv-hb7" secondAttribute="leading" id="fZJ-gM-mi4"/>
+                            <constraint firstItem="jpR-Pv-hb7" firstAttribute="bottom" secondItem="IO9-Kh-IaO" secondAttribute="bottom" id="zqA-Vo-evh"/>
+                            <constraint firstItem="jpR-Pv-hb7" firstAttribute="trailing" secondItem="IO9-Kh-IaO" secondAttribute="trailing" id="zxY-iH-zwf"/>
                         </constraints>
+                        <viewLayoutGuide key="safeArea" id="jpR-Pv-hb7"/>
                         <variation key="default">
                             <mask key="constraints">
                                 <exclude reference="zqA-Vo-evh"/>
