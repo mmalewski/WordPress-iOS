@@ -82,7 +82,7 @@ extension WPStyleGuide {
             return headerHeight
         }
 
-        public static let columnMargin: CGFloat = 7
+        public static let columnMargin: CGFloat = 20
         public static let rowMargin: CGFloat = 10
         public static let minimumColumnWidth: CGFloat = 330
 
